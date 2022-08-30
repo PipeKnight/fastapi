@@ -53,10 +53,11 @@ validation_error_response_definition = {
         "detail": {
             "title": "Detail",
             "type": "array",
-            "items": {"$ref": REF_PREFIX + "ValidationError"},
+            "items": {"$ref": f"{REF_PREFIX}ValidationError"},
         }
     },
 }
+
 
 status_code_ranges: Dict[str, str] = {
     "1XX": "Information",
@@ -158,9 +159,7 @@ def generate_operation_id(
 
 
 def generate_operation_summary(*, route: routing.APIRoute, method: str) -> str:
-    if route.summary:
-        return route.summary
-    return route.name.replace("_", " ").title()
+    return route.summary or route.name.replace("_", " ").title()
 
 
 def get_openapi_operation_metadata(
@@ -178,8 +177,9 @@ def get_openapi_operation_metadata(
             f"Duplicate Operation ID {operation_id} for function "
             + f"{route.endpoint.__name__}"
         )
-        file_name = getattr(route.endpoint, "__globals__", {}).get("__file__")
-        if file_name:
+        if file_name := getattr(route.endpoint, "__globals__", {}).get(
+            "__file__"
+        ):
             message += f" at {file_name}"
         warnings.warn(message)
     operation_ids.add(operation_id)
